@@ -1,25 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Topo from "./components/Topo.js";
+import Init from "./components/Init.js";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./assets/styles/reset.css";
+import "./assets/styles/style.css";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Topo />
+      <Routes>
+        <Route path="/" element={<Init />} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
