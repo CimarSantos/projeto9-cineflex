@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Topo from "./Topo";
 import styled from "styled-components";
 import "../assets/styles/style.css";
 import axios from "axios";
@@ -43,7 +42,7 @@ const Init = () => {
   return (
     <Container>
       {filmes.map((imagens, index) => (
-        <Link to={`/Sessoes/${index}`}>
+        <Link to={`/Sessoes/${imagens.id}`}>
           <Boxmovie key={index} className="flex">
             <img src={imagens.posterURL} alt="filmes" />
           </Boxmovie>
