@@ -1,3 +1,7 @@
+* {
+    font-family: "Roboto";
+}
+
 .flex {
     display: flex;
     justify-content: center;
