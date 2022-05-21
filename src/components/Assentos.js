@@ -1,6 +1,5 @@
-import Horarios from "./Horarios";
 import styled from "styled-components";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -29,7 +28,7 @@ const Container = styled.div`
 
 export default function Assentos() {
   const { idSessao } = useParams();
-  const [assentos, setAssentos] = useState([]);
+  const [seat, setSeat] = useState([]);
 
   useEffect(() => {
     const request = axios.get(
@@ -38,10 +37,10 @@ export default function Assentos() {
 
     request
       .then((response) => {
-        setAssentos(response.data.seats);
+        setSeat(response.data.seats);
       })
       .catch("Aguarde, carregando...");
-  }, []);
+  }, [idSessao]);
 
   return (
     <>
@@ -49,13 +48,10 @@ export default function Assentos() {
         <Boxtitle className="flex">
           <h2>Selecione o(os) assento(os)</h2>
         </Boxtitle>
-
-        {assentos.map((assento, index) => (
-          <Container key={index}>
-            <div>{assento.seats.id}</div>
-          </Container>
-        ))}
       </Container>
+      {seat.map((assento, index) => (
+        <div key={index}>{assento.name}</div>
+      ))}
     </>
   );
 }

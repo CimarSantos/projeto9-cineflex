@@ -91,7 +91,7 @@ export default function Horarios() {
         setitleFooter(response.data.title);
       })
       .catch("Aguarde, carregando...");
-  }, []);
+  }, [idFilme]);
 
   return (
     <>
@@ -104,17 +104,19 @@ export default function Horarios() {
             <h3>
               {sessao.weekday} - {sessao.date}
             </h3>
-            <Link to={`/assentos/${sessao.id}`}>
+            <div>
               {sessao.showtimes.map((showtimes, index) => (
-                <button key={index}>{showtimes.name}</button>
+                <Link to={`/assentos/${showtimes.id}`}>
+                  <button key={index}>{showtimes.name}</button>
+                </Link>
               ))}
-            </Link>
+            </div>
           </Section>
         ))}
       </Container>
       <Boxfooter className="flex">
         <Imagebox className="flex">
-          <img src={imgFooter}></img>
+          <img src={imgFooter} alt="posterMovie"></img>
         </Imagebox>
         <Titulo>{titleFooter}</Titulo>
       </Boxfooter>
