@@ -136,68 +136,14 @@ const Formulario = styled.div`
   }
 `;
 
-function Seat({ seatNumber, isAvailable, reserves, setReserves, id }) {
-  const [escolha, setEscolha] = useState("");
-  let newSeat = { seatNumber: seatNumber, id: id };
 
-  function select() {
-    if (escolha === "") {
-      setEscolha("escolha");
-      setReserves([...reserves, newSeat]);
-    } else {
-      for (let i = 0; i < reserves.length; i++) {
-        if (reserves[i].seatNumber === seatNumber) {
-          reserves.splice(i, 1);
-          break;
-        }
-      }
-      setEscolha("");
-    }
-  }
-
-  function ocupado() {
-    alert("Esse assento não está disponível");
-  }
-
-  if (isAvailable === true) {
-    return (
-      <>
-        {seatNumber < 10 ? (
-          <div className={`seat ${escolha}`} onClick={select}>
-            <p>0{seatNumber}</p>
-          </div>
-        ) : (
-          <div className={`seat ${escolha}`} onClick={select}>
-            <p>{seatNumber}</p>
-          </div>
-        )}
-      </>
-    );
-  } else {
-    return (
-      <>
-        {seatNumber < 10 ? (
-          <div className={`seat ocupado`} onClick={ocupado}>
-            <p>0{seatNumber}</p>
-          </div>
-        ) : (
-          <div className={`seat ocupado`} onClick={ocupado}>
-            <p>{seatNumber}</p>
-          </div>
-        )}
-      </>
-    );
-  }
-}
 
 export default function Assentos({
   reserves,
   setReserves,
-  name,
-  setName,
-  cpf,
-  setCpf,
   setFinalId,
+  pedido,
+  setPedido,
 }) {
   const { idSessao } = useParams();
   const [seat, setSeat] = useState(null);
@@ -206,131 +152,133 @@ export default function Assentos({
   const [diaFilme, setDiaFilme] = useState([]);
   const [horaFilme, setHoraFilme] = useState([]);
   const [assentoSelecionado, setAssentoSelecionado] = useState([]);
+  const [name, setName] = useState("");
+  const [cpf, setCpf] = useState("");
 
-  console.log(assentoSelecionado);
-  let navega = useNavigate();
+  const navigate = useNavigate();
 
-  const mudaRota = (e) => {
-    e.preventDefault();
-    const maxCPFLength = 11;
-    if (name && cpf.length === maxCPFLength) {
-      let path = `/sucesso`;
-      navega(path);
-    }
-  };
-
-  useEffect(() => {
-    const request = axios.get(
-      `https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`
+  function fazerPedido() {
+    const objApi = {
+      name: name,
+      cpf: cpf,
+    };
+    setPedido({
+      ...pedido,
+      nome: name,
+      cpf: cpf,
+    });
+    const request = axios.post(
+      `https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many`,
+      objApi
     );
-
-    request
-      .then((response) => {
-        setSeat(response.data.seats);
-        setimgFooter(response.data.movie.posterURL);
-        setitleFooter(response.data.movie.title);
-        setDiaFilme(response.data.day.weekday);
-        setHoraFilme(response.data.name);
-      })
-      .catch("Aguarde, carregando...");
-  }, [idSessao]);
-
-  function validaCpf(e) {
-    if (cpf.length < 11 || e.nativeEvent.inputType === "deleteContentBackward")
-      setCpf(e.target.value);
+    request.then(navigate("/sucesso"));
   }
-  if (seat === null) {
-    return <p>Carregando</p>;
-  }
-  return (
-    <>
-      <Container>
-        <Boxtitle className="flex">
-          <h2>Selecione o(os) assento(os)</h2>
-        </Boxtitle>
-        {seat ? (
-          <Cadeiras className="flex">
-            {seat.map((assento, index) => (
-              <Cadeira
-                number={assento.name}
-                id={assento.id}
-                isAvailable={assento.isAvailable}
-                assentoSelecionado={assentoSelecionado}
-                setAssentoSelecionado={setAssentoSelecionado}
-              />
-            ))}
-          </Cadeiras>
-        ) : (
-          <p>Carregando</p>
-        )}
 
-        <Legenda className="flex">
-          <div className="flex">
-            <div className="selecionado"></div>
-            <p>Selecionado</p>
-          </div>
-          <div className="flex disponivel">
-            <div className="disponivel"></div>
-            <p>Disponível</p>
-          </div>
-          <div className="flex indisponivel">
-            <div className="ocupado"></div>
-            <p>Indisponível</p>
-          </div>
-        </Legenda>
-      </Container>
-      <Container>
-        <Formulario>
-          <form className="userInfo" action="">
-            <div>
-              <label htmlFor="nome">Nome do comprador:</label>
+    useEffect(() => {
+      const request = axios.get(
+        `https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`
+      );
+
+      request
+        .then((response) => {
+          setSeat(response.data.seats);
+          setimgFooter(response.data.movie.posterURL);
+          setitleFooter(response.data.movie.title);
+          setDiaFilme(response.data.day.weekday);
+          setHoraFilme(response.data.name);
+        })
+        .catch("Aguarde, carregando...");
+    }, [idSessao]);
+
+    return (
+      <>
+        <Container>
+          <Boxtitle className="flex">
+            <h2>Selecione o(os) assento(os)</h2>
+          </Boxtitle>
+          {seat ? (
+            <Cadeiras className="flex">
+              {seat.map((assento, index) => (
+                <Cadeira
+                  number={assento.name}
+                  id={assento.id}
+                  isAvailable={assento.isAvailable}
+                  assentoSelecionado={assentoSelecionado}
+                  setAssentoSelecionado={setAssentoSelecionado}
+                />
+              ))}
+            </Cadeiras>
+          ) : (
+            <p>Carregando</p>
+          )}
+
+          <Legenda className="flex">
+            <div className="flex">
+              <div className="selecionado"></div>
+              <p>Selecionado</p>
             </div>
-            <div>
-              <input
-                id="nome"
-                className="reservationIn"
-                type="text"
-                placeholder="Qual seu nome?"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+            <div className="flex disponivel">
+              <div className="disponivel"></div>
+              <p>Disponível</p>
             </div>
-            <div>
-              <label htmlFor="cpf">CPF do comprador:</label>
+            <div className="flex indisponivel">
+              <div className="ocupado"></div>
+              <p>Indisponível</p>
             </div>
-            <div>
-              <input
-                id="cpf"
-                className="reservationIn"
-                type="number"
-                placeholder="Qual o número do seu CPF?"
-                value={cpf}
-                onChange={(e) => validaCpf(e)}
-                required
-              />
-            </div>
-            <div>
-              <button type="submit" className="reserve" onClick={mudaRota}>
-                <h3>Reservar assento(s)</h3>
-              </button>
-            </div>
-          </form>
-        </Formulario>
-      </Container>
-      <Boxfooter className="flex">
-        <Imagebox className="flex">
-          <img src={imgFooter} alt="posterMovie"></img>
-        </Imagebox>
-        <Titulo>
-          {titleFooter}
-          <p>
-            {diaFilme} - {horaFilme}
-          </p>
-        </Titulo>
-      </Boxfooter>
-    </>
-  );
+          </Legenda>
+        </Container>
+        <Container>
+          <Formulario>
+            <form className="userInfo" action="">
+              <div>
+                <label htmlFor="nome">Nome do comprador:</label>
+              </div>
+              <div>
+                <input
+                  id="nome"
+                  className="reservationIn"
+                  type="text"
+                  placeholder="Qual seu nome?"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="cpf">CPF do comprador:</label>
+              </div>
+              <div>
+                <input
+                  id="cpf"
+                  className="reservationIn"
+                  type="number"
+                  placeholder="Qual o número do seu CPF?"
+                  value={cpf}
+                  onChange={(event) => setCpf(event.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <button type="submit" className="reserve" onClick={fazerPedido}>
+                  <h3>Reservar assento(s)</h3>
+                </button>
+              </div>
+            </form>
+          </Formulario>
+        </Container>
+        <Boxfooter className="flex">
+          <Imagebox className="flex">
+            <img src={imgFooter} alt="posterMovie"></img>
+          </Imagebox>
+          <Titulo>
+            {titleFooter}
+            <p>
+              {diaFilme} - {horaFilme}
+            </p>
+          </Titulo>
+        </Boxfooter>
+      </>
+    );
 }
 
 function Cadeira({
@@ -341,7 +289,6 @@ function Cadeira({
   setAssentoSelecionado,
 }) {
   const [selected, setSelected] = useState(false);
-  console.log(selected);
 
   function select(isAvailable, id) {
     if (isAvailable) {
