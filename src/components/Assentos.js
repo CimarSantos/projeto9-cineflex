@@ -152,13 +152,21 @@ export default function Assentos({
   const [diaFilme, setDiaFilme] = useState([]);
   const [horaFilme, setHoraFilme] = useState([]);
   const [assentoSelecionado, setAssentoSelecionado] = useState([]);
+  const [selectedSeats, setSelectedSeats] = useState([]);
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
 
   const navigate = useNavigate();
 
   function fazerPedido() {
+    let selectedSeatsIds = [];
+    let selectedSeatsNumbers = [];
+    selectedSeats.forEach((seat) => {
+      selectedSeatsIds.push(seat.id);
+      selectedSeatsNumbers.push(seat.number);
+    });
     const objApi = {
+      ids: selectedSeatsIds,
       name: name,
       cpf: cpf,
     };
@@ -166,6 +174,7 @@ export default function Assentos({
       ...pedido,
       nome: name,
       cpf: cpf,
+      assentos: selectedSeatsNumbers,
     });
     const request = axios.post(
       `https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many`,
@@ -174,111 +183,118 @@ export default function Assentos({
     request.then(navigate("/sucesso"));
   }
 
-    useEffect(() => {
-      const request = axios.get(
-        `https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`
-      );
-
-      request
-        .then((response) => {
-          setSeat(response.data.seats);
-          setimgFooter(response.data.movie.posterURL);
-          setitleFooter(response.data.movie.title);
-          setDiaFilme(response.data.day.weekday);
-          setHoraFilme(response.data.name);
-        })
-        .catch("Aguarde, carregando...");
-    }, [idSessao]);
-
-    return (
-      <>
-        <Container>
-          <Boxtitle className="flex">
-            <h2>Selecione o(os) assento(os)</h2>
-          </Boxtitle>
-          {seat ? (
-            <Cadeiras className="flex">
-              {seat.map((assento, index) => (
-                <Cadeira
-                  number={assento.name}
-                  id={assento.id}
-                  isAvailable={assento.isAvailable}
-                  assentoSelecionado={assentoSelecionado}
-                  setAssentoSelecionado={setAssentoSelecionado}
-                />
-              ))}
-            </Cadeiras>
-          ) : (
-            <p>Carregando</p>
-          )}
-
-          <Legenda className="flex">
-            <div className="flex">
-              <div className="selecionado"></div>
-              <p>Selecionado</p>
-            </div>
-            <div className="flex disponivel">
-              <div className="disponivel"></div>
-              <p>Disponível</p>
-            </div>
-            <div className="flex indisponivel">
-              <div className="ocupado"></div>
-              <p>Indisponível</p>
-            </div>
-          </Legenda>
-        </Container>
-        <Container>
-          <Formulario>
-            <form className="userInfo" action="">
-              <div>
-                <label htmlFor="nome">Nome do comprador:</label>
-              </div>
-              <div>
-                <input
-                  id="nome"
-                  className="reservationIn"
-                  type="text"
-                  placeholder="Qual seu nome?"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="cpf">CPF do comprador:</label>
-              </div>
-              <div>
-                <input
-                  id="cpf"
-                  className="reservationIn"
-                  type="number"
-                  placeholder="Qual o número do seu CPF?"
-                  value={cpf}
-                  onChange={(event) => setCpf(event.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <button type="submit" className="reserve" onClick={fazerPedido}>
-                  <h3>Reservar assento(s)</h3>
-                </button>
-              </div>
-            </form>
-          </Formulario>
-        </Container>
-        <Boxfooter className="flex">
-          <Imagebox className="flex">
-            <img src={imgFooter} alt="posterMovie"></img>
-          </Imagebox>
-          <Titulo>
-            {titleFooter}
-            <p>
-              {diaFilme} - {horaFilme}
-            </p>
-          </Titulo>
-        </Boxfooter>
-      </>
+  useEffect(() => {
+    const request = axios.get(
+      `https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${idSessao}/seats`
     );
+
+    request
+      .then((response) => {
+        setSeat(response.data.seats);
+        setimgFooter(response.data.movie.posterURL);
+        setitleFooter(response.data.movie.title);
+        setDiaFilme(response.data.day.weekday);
+        setHoraFilme(response.data.name);
+        setPedido({
+          filme: response.data.movie.title,
+          data: response.data.day.date,
+          horario: response.data.name,
+        });
+      })
+      .catch("Aguarde, carregando...");
+  }, [idSessao]);
+
+  return (
+    <>
+      <Container>
+        <Boxtitle className="flex">
+          <h2>Selecione o(os) assento(os)</h2>
+        </Boxtitle>
+        {seat ? (
+          <Cadeiras className="flex">
+            {seat.map((assento, index) => (
+              <Cadeira
+                number={assento.name}
+                id={assento.id}
+                isAvailable={assento.isAvailable}
+                assentoSelecionado={assentoSelecionado}
+                setAssentoSelecionado={setAssentoSelecionado}
+                setSelectedSeats={setSelectedSeats}
+                selectedSeats={selectedSeats}
+              />
+            ))}
+          </Cadeiras>
+        ) : (
+          <p>Carregando</p>
+        )}
+
+        <Legenda className="flex">
+          <div className="flex">
+            <div className="selecionado"></div>
+            <p>Selecionado</p>
+          </div>
+          <div className="flex disponivel">
+            <div className="disponivel"></div>
+            <p>Disponível</p>
+          </div>
+          <div className="flex indisponivel">
+            <div className="ocupado"></div>
+            <p>Indisponível</p>
+          </div>
+        </Legenda>
+      </Container>
+      <Container>
+        <Formulario>
+          <form className="userInfo" action="">
+            <div>
+              <label htmlFor="nome">Nome do comprador:</label>
+            </div>
+            <div>
+              <input
+                id="nome"
+                className="reservationIn"
+                type="text"
+                placeholder="Qual seu nome?"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="cpf">CPF do comprador:</label>
+            </div>
+            <div>
+              <input
+                id="cpf"
+                className="reservationIn"
+                type="number"
+                placeholder="Qual o número do seu CPF?"
+                value={cpf}
+                onChange={(event) => setCpf(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <button type="submit" className="reserve" onClick={fazerPedido}>
+                <h3>Reservar assento(s)</h3>
+              </button>
+            </div>
+          </form>
+        </Formulario>
+      </Container>
+      <Boxfooter className="flex">
+        <Imagebox className="flex">
+          <img src={imgFooter} alt="posterMovie"></img>
+        </Imagebox>
+        <Titulo>
+          {titleFooter}
+          <p>
+            {diaFilme} - {horaFilme}
+          </p>
+        </Titulo>
+      </Boxfooter>
+    </>
+  );
 }
 
 function Cadeira({
@@ -287,17 +303,19 @@ function Cadeira({
   isAvailable,
   assentoSelecionado,
   setAssentoSelecionado,
+  selectedSeats,
+  setSelectedSeats,
 }) {
   const [selected, setSelected] = useState(false);
 
-  function select(isAvailable, id) {
+  function select(isAvailable, id, number, selectedSeats, setSelectedSeats) {
     if (isAvailable) {
       setSelected(!selected);
       if (selected) {
-        let array = assentoSelecionado.filter((assento) => assento !== id);
-        setAssentoSelecionado(array);
+        let array = selectedSeats.filter((seat) => seat !== id);
+        setSelectedSeats(array);
       } else {
-        setAssentoSelecionado([...assentoSelecionado, id]);
+        setSelectedSeats([...selectedSeats, { id: id, number: number }]);
       }
     } else {
       alert("Assento não disponível...");

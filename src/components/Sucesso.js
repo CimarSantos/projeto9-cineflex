@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
-import axios from "axios";
 
 const Boxtitle = styled.div`
   background-color: #e5e5e5;
@@ -11,7 +9,8 @@ const Boxtitle = styled.div`
   h2 {
     font-size: 24px;
     font-family: "Roboto";
-    color: #293845;
+    color: #247a6b;
+    padding: 30px 50px;
   }
 `;
 
@@ -28,11 +27,21 @@ const Container = styled.div`
 
 const Section = styled.div`
   h3 {
-    font-size: 20px;
+    font-size: 24px;
+    color: #293845;
+    font-weight: 700;
+    font-family: "Roboto";
+    margin-bottom: 15px;
+  }
+
+  p {
+    font-size: 22px;
+    font-family: "Roboto";
+    margin-bottom: 10px;
   }
 
   button {
-    width: 83px;
+    width: 225px;
     height: 43px;
     background-color: #e8833a;
     color: #fff;
@@ -43,83 +52,40 @@ const Section = styled.div`
   }
 `;
 
-export default function Sucesso({
-  reserves,
-  name,
-  cpf,
-  finalId,
-  setReserves,
-  setCpf,
-  setName,
-}) {
-  const [seat, setSeat] = useState({ name: "", movie: "", day: "" });
-
-  useEffect(() => {
-    let novaReserva = { ids: [], name: name, cpf: cpf };
-    for (let i = 0; i < reserves.length; i++) {
-      novaReserva.ids.push(reserves[i].id);
-    }
-    axios.post(
-      "https://mock-api.driven.com.br/api/v5/cineflex/seats/book-many",
-      novaReserva
-    );
-    let promise = axios.get(
-      `https://mock-api.driven.com.br/api/v5/cineflex/showtimes/${finalId}/seats`
-    );
-    promise.then((info) => setSeat(info.data));
-  }, []);
-
-  function novoCpf() {
-    let aux = "";
-    for (let i = 0; i < cpf.length - 2; i++) {
-      if (i % 3 === 0 && i !== 0) {
-        aux += `${cpf[i]}`;
-      } else {
-        aux += `.${cpf[i]}`;
-      }
-    }
-    aux += "-" + cpf[cpf.length - 2] + cpf[cpf.length - 1];
-    return aux;
-  }
-
-  let stringCPF = novoCpf();
-  let navigate = useNavigate();
-
-  function voltaInit() {
-    setReserves([]);
-    setName("");
-    setCpf("");
-    let path = `/`;
-    navigate(path);
-  }
-
+export default function Sucesso({ pedido }) {
   return (
     <>
       <Container>
-        <Boxtitle className="flex">
-          <h2>Pedido feito com Sucesso!</h2>
+        <Boxtitle className="bold">
+          <h2>Pedido feito com sucesso! </h2>
         </Boxtitle>
-        <Section className="Sessao">
+      </Container>
+      <Container>
+        <Section>
           <h3>Filme e sessão</h3>
-          <h4>{seat.movie.title}</h4>
-          <h4>
-            {seat.day.date} {seat.name}
-          </h4>
+          <p>{pedido.filme}</p>
+          <p>
+            {pedido.data} {pedido.horario}
+          </p>
         </Section>
-        <Section className="assento">
+        <Section>
           <h3>Ingressos</h3>
-          {reserves.map((info, i) => (
-            <h4 key={i}>Assento {info.seatNumber}</h4>
-          ))}
+          <span>
+            {pedido.assentos.map((assento) => (
+              <span className="centralizado flexD">Assento {assento}</span>
+            ))}
+          </span>
         </Section>
-        <Section className="comprador">
+        <Section>
           <h3>Comprador</h3>
-          <h4>Nome: {name}</h4>
-          <h4>CPF: {stringCPF}</h4>
+          <p>Nome: {pedido.nome}</p>
+          <p>CPF: {pedido.cpf}</p>
         </Section>
-        <button className="reserva" onClick={voltaInit}>
-          Voltar pra Home
-        </button>
+        <Section>
+          <Link to="/">
+            <button>Voltar para Home</button>
+          </Link>
+        </Section>
       </Container>
     </>
   );

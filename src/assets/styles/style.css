@@ -9,4 +9,7 @@
     flex-wrap: wrap;
 }
 
-
+.bold {
+    font-weight: bold;
+    color: #247A6B;
+}
